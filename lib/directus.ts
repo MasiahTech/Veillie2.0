@@ -1,20 +1,10 @@
-import { createDirectus, rest, readItems, createItems, updateItems, deleteItems } from '@directus/sdk';
+import { Directus } from '@directus/sdk';
 
-const directus = createDirectus(process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://your-directus-url.com').with(rest());
+const directus = new Directus('https://your-directus-instance.com'); // Replace with your Directus instance URL
 
-export const fetchItems = async (collection: string) => {
+export const createItem = async (collection: string, item: any): Promise<any | null> => {
   try {
-    const items = await directus.request(readItems(collection));
-    return items;
-  } catch (error) {
-    console.error('Error fetching items:', error);
-    return [];
-  }
-};
-
-export const createItem = async (collection: string, item: any) => {
-  try {
-    const createdItem = await directus.request(createItems(collection, [item]));
+    const createdItem = await directus.items(collection).createOne(item);
     return createdItem;
   } catch (error) {
     console.error('Error creating item:', error);
@@ -22,9 +12,9 @@ export const createItem = async (collection: string, item: any) => {
   }
 };
 
-export const updateItem = async (collection: string, id: string, item: any) => {
+export const updateItem = async (collection: string, id: string, item: any): Promise<any | null> => {
   try {
-    const updatedItem = await directus.request(updateItems(collection, [{ id, ...item }]));
+    const updatedItem = await directus.items(collection).updateOne(id, item);
     return updatedItem;
   } catch (error) {
     console.error('Error updating item:', error);
@@ -32,14 +22,12 @@ export const updateItem = async (collection: string, id: string, item: any) => {
   }
 };
 
-export const deleteItem = async (collection: string, id: string) => {
+export const deleteItem = async (collection: string, id: string): Promise<boolean> => {
   try {
-    await directus.request(deleteItems(collection, [id]));
+    await directus.items(collection).deleteOne(id);
     return true;
   } catch (error) {
     console.error('Error deleting item:', error);
     return false;
   }
 };
-
-export default directus;

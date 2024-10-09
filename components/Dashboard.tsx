@@ -6,7 +6,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
-import { fetchItems } from '@/lib/directus'
+import { Directus } from '@directus/sdk';
+
+
+const directus = new Directus('https://your-directus-instance.com'); // Replace with your Directus instance URL
+
+export const fetchItems = async (collection: string): Promise<any[] | null> => {
+  try {
+    const items = await directus.items(collection).readMany({});
+    return items.data ?? null;
+  } catch (error) {
+    console.error('Error fetching items:', error);
+    return null;
+  }
+};
 
 interface DashboardData {
   totalTickets: number;
@@ -20,19 +33,7 @@ interface DashboardData {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
 
 export default function Dashboard() {
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      const data = await fetchItems('dashboard');
-      setDashboardData(data[0] as DashboardData);
-    };
-    loadDashboardData();
-  }, []);
-
-  if (!dashboardData) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <Tabs defaultValue="daily" className="space-y-4">
